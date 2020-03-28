@@ -1,0 +1,30 @@
+{
+    "description": "Example PDA (NOTE: 'E' is lambda)",
+    "states": [
+        "q1",
+        "q2",
+        "q3",
+        "q4"
+    ],
+    "alphabet": [
+        "1", 
+        "0"
+    ],
+    "start_state": [
+        "q1"
+    ],
+    "end_state": [
+        "q4"
+    ],
+    "transitions": [
+        ["q1", "E", "q2", "E", "E"],
+
+        ["q2", "0", "q2", "E", "0"],
+        ["q2", "1", "q3", "0", "E"],
+
+        ["q3", "1", "q3", "0", "E"],
+        ["q3", "E", "q4", "E", "E"]
+    ],
+    "strings": ["1110001", "1111111", "0000000"]
+}
+
