@@ -1,8 +1,8 @@
 from .import node
 
-class NodeCollection:  # NOTE: Add check in add to see if state is final, add bool to set to true
+class NodeCollection:
     def __init__(self):
-        nodes = []
+        self.nodes = []
         self.count = 0
 
     def add(self, node):
@@ -10,20 +10,28 @@ class NodeCollection:  # NOTE: Add check in add to see if state is final, add bo
         Adds a node to the nodes list, will increment number of nodes
         """
         self.nodes.append(node)
-        # try:
-        #     if state not in self.states:  # Check if the state has not been added yet
-        #         self.states.append(state)
-        #         self.states.sort()  # Sort the list
-        #         self.count += 1
-        #         return True
-        # except ValueError:
-        #     pass
+        self.count += 1
 
-    # def __str__(self):
-    #     """
-    #     Override the string function to call get_formatted_states()
-    #     """
-    #     if self.is_transition:
-    #         return self.name
-    #     else:
-    #         return self.name + " " + self.stack_action
+    def find_node(self, node):
+        """
+        Accepts a node object as its parameter
+        Returns index of node in NodeCollection object
+        """
+        for i in range(self.count):
+            if node.name == self.nodes[i].name:
+                return i
+
+        return -1
+
+
+    def __str__(self):
+        """
+        Override the string function to return all nodes in the collection
+        """
+        nodes = ""
+        if self.count > 0:
+            for n in self.nodes:
+                nodes += str(n)
+            return nodes
+        else:
+            return "No Nodes."

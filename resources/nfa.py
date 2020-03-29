@@ -146,7 +146,7 @@ class Nfa:
     def construct_trans_table(self, trans_table, row, col, transitions, states):
         # self.nfa_num_rows = len(self.nfa_states) + 1
         # self.nfa_num_cols = len(self.alphabet) + 1
-        # self.nfa_trans_table = [[0 for x in range(self.nfa_num_cols)] for y in range(self.nfa_num_rows)]
+        # self.nfa_trans_table = [[0 for x ind range(self.nfa_num_cols)] for y in range(self.nfa_num_rows)]
 
         # trans_table[0] is the first row
         # Input the alphabet characters
