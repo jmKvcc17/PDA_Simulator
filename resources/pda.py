@@ -15,6 +15,8 @@ class PDA:
         self.end_state = []
         self.pda_stack = [] # Use append() to push, pop() to remove
 
+        self.included_strings = True  # Bool to check if the included JSON file has strings provided
+
         # NFA and DFA construction
         self.parse_data()  # Get data from the JSON file
 
@@ -24,14 +26,13 @@ class PDA:
         self.pda_trans_table = [[0 for x in range(self.pda_num_cols)] for y in range(self.pda_num_rows)]
         self.construct_trans_table(self.pda_trans_table, self.pda_num_rows, self.pda_num_cols, self.pda_transitions, self.pda_states)
         self.print_transition_table(self.pda_trans_table, self.pda_num_rows, self.pda_num_cols)
-        print(self.get_transition(self.pda_trans_table, self.pda_states, "q3", "E"))
-        # self.print_transition_table(self.nfa_trans_table, self.nfa_num_rows, self.nfa_num_cols)
+        print(self.get_transition(self.pda_trans_table, self.pda_states, "q1", "0"))
         # self.check_all_strings()
 
         print("End.")
 
     def check_if_start(self, state):
-        if state == self.start_state:
+        if state == self.start_state[0]:
             return True
         else:
             return False
@@ -56,7 +57,10 @@ class PDA:
 
         trans_state = trans_table[row][col]  # Is a node object
 
-        # print(f"trans({state}, {char}) = {trans_state}")
+        # If the character to transition on is empty, check if there is a lambda transition
+        if trans_state == 0:
+            col = self.alphabet.index("E") + 1
+            trans_state = trans_table[row][col]
 
         return trans_state
 
@@ -96,7 +100,7 @@ class PDA:
             char_index = self.alphabet.index(char) + 1
 
             if trans_table[start_index][char_index] == 0:  # If this is an unitialized node
-                node_collection = NodeCollection()
+                node_collection = NodeCollection()  # Create a NodeCollection object to store mult. nodes
                 node = Node()
                 node.name = end
                 node.is_transition = True
@@ -109,7 +113,7 @@ class PDA:
 
                 node_collection.add(node)
 
-                trans_table[start_index][char_index] = node_collection  # Create the node object
+                trans_table[start_index][char_index] = node_collection  # Add the node to the table
             else:  # If this node already has an existing node, add the next one
                 node_collection = NodeCollection()
                 node = Node()
@@ -163,5 +167,8 @@ class PDA:
             self.pda_transitions.append(self.input_data['transitions'][i])
 
         # Get the strings
-        self.strings = self.input_data['strings']
-        # print(self.strings)
+        try:
+            self.strings = self.input_data['strings']
+        except KeyError:
+            print("No included strings in JSON file, switching to manual entry mode.")
+            self.included_strings = False

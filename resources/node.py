@@ -22,4 +22,10 @@ class Node:
         if self.is_transition:
             return self.name + " " + self.stack_action[0] + self.stack_action[1]
         else:
-            return self.name
+            string = self.name
+            if self.is_start:
+                string = "->" + string
+            if self.is_final:
+                string = "*" + string
+            
+            return string
