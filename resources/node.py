@@ -17,10 +17,10 @@ class Node:
 
     def __str__(self):
         """
-        Override the string function to call get_formatted_states()
+        Override the string function to return the name of the node or the name of the node and its stack
         """
         if self.is_transition:
-            return self.name + " " + self.stack_action[0] + self.stack_action[1]
+            return self.name + " " + "(" + self.stack_action[0] + "/" + self.stack_action[1] + ")"
         else:
             string = self.name
             if self.is_start:

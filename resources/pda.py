@@ -8,12 +8,17 @@ class PDA:
         self.strings = []
 
         # Variables
-        # NFA
+        # PDA
         self.pda_states = []
         self.pda_transitions = []
         self.alphabet = []
         self.end_state = []
         self.pda_stack = [] # Use append() to push, pop() to remove
+
+        # Bools
+        # Used to check if the current transition was a lambda transition, as to not 
+        # consume a character in the string
+        self.is_lambda = False  
 
         self.included_strings = True  # Bool to check if the included JSON file has strings provided
 
@@ -26,8 +31,11 @@ class PDA:
         self.pda_trans_table = [[0 for x in range(self.pda_num_cols)] for y in range(self.pda_num_rows)]
         self.construct_trans_table(self.pda_trans_table, self.pda_num_rows, self.pda_num_cols, self.pda_transitions, self.pda_states)
         self.print_transition_table(self.pda_trans_table, self.pda_num_rows, self.pda_num_cols)
-        print(self.get_transition(self.pda_trans_table, self.pda_states, "q1", "0"))
-        # self.check_all_strings()
+
+        if self.traverse_table("0011"):
+            print("String accepted.")
+        else:
+            print("String rejected.")
 
         print("End.")
 
@@ -44,23 +52,62 @@ class PDA:
         except ValueError:
             return False
 
-    # def traverse_table(self):
+    def do_stack_action(self, stack_action):
+        if stack_action[0] == 'E' and stack_action[1] == 'E':  # If the action is to do nothing
+            return False
+        if stack_action[0] == 'E' and stack_action[1] != 'E':  # If the action is to add to the stack
+            self.pda_stack.append(stack_action[1])
+        if stack_action[0] != 'E' and stack_action[1] == 'E':  # If the action is to pop from the stack
+            if len(self.pda_stack) == 0:  # If the length of the stack is zero, then the action fails
+                return False
 
-    def get_transition(self, trans_table, states, state, char):
+
+    def traverse_table(self, user_string):
+        # user_string = "0011"
+        traverse_table_bool = True  # Used for while loop to traverse the PDA
+        user_string_index = 0
+        ret = False
+
+        current_state = self.pda_trans_table[1][0]  # Set the initial state to the starting state
+
+        print(current_state)
+
+        # Get the first transition from the starting state
+        current_char = user_string[user_string_index]
+        current_state = self.get_transition(current_state.name, current_char)
+
+        while(traverse_table_bool):
+            # current_char = user_string[user_string_index]
+
+            current_state = self.get_transition(current_state.name, current_char)
+
+            if current_state == 0:  # Check if the state is empty on a character
+                print("Encountered character that cannot be accepted at a state.")
+                # traverse_table_bool = False
+                break
+            if current_state.count > 2:  # If this is a mult. state transition
+
+        return ret
+
+
+    def get_transition(self, state, char):
         """
         Given a starting state and a character, will return the transition state.
         The transition state is a NodeCollection object, so it could have multiple nodes in it
         """
+        self.is_lambda = False
+
         # get the state index
-        row = states.index(state) + 1
+        row = self.pda_states.index(state) + 1
         col = self.alphabet.index(char) + 1
 
-        trans_state = trans_table[row][col]  # Is a node object
+        trans_state = self.pda_trans_table[row][col]  # Is a node object
 
         # If the character to transition on is empty, check if there is a lambda transition
         if trans_state == 0:
             col = self.alphabet.index("E") + 1
-            trans_state = trans_table[row][col]
+            trans_state = self.pda_trans_table[row][col]
+            self.is_lambda = True
 
         return trans_state
 
