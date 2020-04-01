@@ -111,8 +111,6 @@ class PDA:
                         temp_states.append(node)
                 else:  # It was not a lambda transition
 
-            break
-
             # current_char = user_string[user_string_index]
             # if self.is_lambda:  # If the last transition was a lambda transition
             #     for state in current_state
