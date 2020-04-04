@@ -82,48 +82,94 @@ class PDA:
             else:
                 return False
 
+        return False
+
+    def traverse(self, current_state, user_string, user_string_index, curr_stack):
+
+        current_char = user_string[user_string_index]
+        current_state = self.get_transition(current_state.name, current_char)
+        current_stack = curr_stack
+        res = False
+
+        if current_state == 0:  # If the transition was null, the string is not accepted
+            return False
+        else:
+            for node in current_state.nodes:  # Loop 
+
+                if self.do_stack_action(node.stack_action):
+                    print(f"Current node: {node}, index: {user_string_index}, stack: {curr_stack}")
+                    chars_left = len(user_string) - (user_string_index + 1)
+                    if node.is_final and len(current_stack) == 0 and chars_left == 0:  # If the current node is terminal, the stack is empty and there are no more characters left
+                        return True
+                    else:  # There is more to traverse
+                        if self.is_lambda:  # If the transition was lambda, don't move to the next character in the string yet
+                            res = self.traverse(node, user_string, user_string_index, current_stack)
+                        else:  # The transition was not lambda, consume the character and increment the string index
+                            res = self.traverse(node, user_string, user_string_index + 1, current_stack)
+                else:
+                    return False
+
+        return res
+
 
     def traverse_table(self, user_string):
         # user_string = "0011"
-        traverse_table_bool = True  # Used for while loop to traverse the PDA
+        # traverse_table_bool = True  # Used for while loop to traverse the PDA
         user_string_index = 0
-        user_string_length = len(user_string)
         ret = False
 
         current_state = self.pda_trans_table[1][0]  # Set the initial state to the starting state
-        temp_states = []  # Used when a state has multiple states to potentially transition on
-
-        # print(current_state)
+        # temp_states = []  # Used when a state has multiple states to potentially transition on
 
         # Get the first transition from the starting state
         current_char = user_string[user_string_index]
         current_state = self.get_transition(current_state.name, current_char)
+        current_stack = self.pda_stack
+        res = False
 
-        while(traverse_table_bool):
-            if current_state == 0:  # Check if the state is empty on a character
-                print("Encountered character that cannot be accepted at a state.")
-                # traverse_table_bool = False
-                break
-            else:  # There is a transition on that character
-                if self.is_lambda:  # If the last transition was a lambda transition
-                    for node in current_state.nodes:
-                        print(node)
-                        temp_states.append(node)
-                else:  # It was not a lambda transition
+        if current_state == 0:
+            return False
+        else:
+            for node in current_state.nodes:
+                if self.do_stack_action(node.stack_action):
+                    print(f"Current node: {node}, index: {user_string_index}, stack: {current_stack}")
+                    chars_left = len(user_string) - (user_string_index + 1)
+                    if node.is_final and len(current_stack) == 0 and chars_left == 0:  # If the current node is terminal, the stack is empty and there are no more characters left
+                        return True
+                    else:  # There is more to traverse
+                        if self.is_lambda:  # If the transition was lambda, don't move to the next character in the string yet
+                            res = self.traverse(node, user_string, user_string_index, current_stack)
+                        else:  # The transition was not lambda, consume the character and increment the string index
+                            res = self.traverse(node, user_string, user_string_index + 1, current_stack)
+                else:
+                    return False
+                
 
-            # current_char = user_string[user_string_index]
-            # if self.is_lambda:  # If the last transition was a lambda transition
-            #     for state in current_state
+        # while(traverse_table_bool):
+        #     if current_state == 0:  # Check if the state is empty on a character
+        #         print("Encountered character that cannot be accepted at a state.")
+        #         # traverse_table_bool = False
+        #         break
+        #     else:  # There is a transition on that character
+        #         if self.is_lambda:  # If the last transition was a lambda transition
+        #             for node in current_state.nodes:
+        #                 print(node)
+        #                 temp_states.append(node)
+        #         else:  # It was not a lambda transition
 
-            # current_state = self.get_transition(current_state.name, current_char)
+        #     # current_char = user_string[user_string_index]
+        #     # if self.is_lambda:  # If the last transition was a lambda transition
+        #     #     for state in current_state
 
-            if current_state == 0:  # Check if the state is empty on a character
-                print("Encountered character that cannot be accepted at a state.")
-                # traverse_table_bool = False
-                break
-            # if current_state.count > 2:  # If this is a mult. state transition
+        #     # current_state = self.get_transition(current_state.name, current_char)
+
+        #     if current_state == 0:  # Check if the state is empty on a character
+        #         print("Encountered character that cannot be accepted at a state.")
+        #         # traverse_table_bool = False
+        #         break
+        #     # if current_state.count > 2:  # If this is a mult. state transition
         
-        return ret
+        return res
 
 
     def get_transition(self, state, char):
