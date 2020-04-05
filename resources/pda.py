@@ -41,10 +41,17 @@ class PDA:
         # print(self.do_stack_action(['B', 'E']))
         # print(self.pda_stack)
 
-        if self.traverse_table("0011"):
-            print("String accepted.")
-        else:
-            print("String rejected.")
+        for string in self.strings:
+            try:
+                print(f"Using string: {string}")
+                if self.traverse_table(string):
+                    print("String accepted.")
+                else:
+                    print("String rejected.")
+            except IndexError:
+                print(f"Index error with string: {string}")
+            except AttributeError:
+                print(f"Atribute error with string: {string}")
 
         print("End.")
 
@@ -85,8 +92,37 @@ class PDA:
         return False
 
     def traverse(self, current_state, user_string, user_string_index, curr_stack):
+        """
+        Recursive function that traverses the PDA and performs the necessary functions to the
+        string and stack.
+        """
+        # -print(f"Before checks index: {user_string_index}")
 
-        current_char = user_string[user_string_index]
+        try:  # Check needed if the string has been consumed, need to check for lambda transition
+            current_char = user_string[user_string_index]
+        except IndexError:  # The string index is greater than the string length, string has been consumed, check for lambda or return false
+            current_char = -1
+            temp_state = self.get_lambda_transition(current_state.name)
+
+            if current_state == 0:  # If the transition was null, the string is not accepted
+                return False
+            else:
+                for node in temp_state.nodes:  # Loop through each node in the node collection
+
+                    if self.do_stack_action(node.stack_action):
+                        # -print(f"Current node: {node}, index: {user_string_index}, stack: {curr_stack}")
+                        chars_left = len(user_string) - (user_string_index + 1)
+                        # -print(f"Characters left: {chars_left}")
+                        if node.is_final and len(curr_stack) == 0:  # If the current node is terminal, the stack is empty and there are no more characters left
+                            return True
+                        else:  # Since the string has been consumed, there cannot be more to traverse in the table.
+                            # return False
+                            res = self.traverse(node, user_string, user_string_index, curr_stack)
+                            
+                    else:
+                        return False
+
+        # -print(f"Current character: \"{current_char}\"")
         current_state = self.get_transition(current_state.name, current_char)
         current_stack = curr_stack
         res = False
@@ -97,9 +133,10 @@ class PDA:
             for node in current_state.nodes:  # Loop 
 
                 if self.do_stack_action(node.stack_action):
-                    print(f"Current node: {node}, index: {user_string_index}, stack: {curr_stack}")
+                    # -print(f"Current node: {node}, index: {user_string_index}, stack: {curr_stack}")
                     chars_left = len(user_string) - (user_string_index + 1)
-                    if node.is_final and len(current_stack) == 0 and chars_left == 0:  # If the current node is terminal, the stack is empty and there are no more characters left
+                    # -print(f"Characters left: {chars_left}")
+                    if node.is_final and len(current_stack) == 0 and chars_left <= 0:  # If the current node is terminal, the stack is empty and there are no more characters left
                         return True
                     else:  # There is more to traverse
                         if self.is_lambda:  # If the transition was lambda, don't move to the next character in the string yet
@@ -113,19 +150,40 @@ class PDA:
 
 
     def traverse_table(self, user_string):
-        # user_string = "0011"
-        # traverse_table_bool = True  # Used for while loop to traverse the PDA
         user_string_index = 0
-        ret = False
-
         current_state = self.pda_trans_table[1][0]  # Set the initial state to the starting state
-        # temp_states = []  # Used when a state has multiple states to potentially transition on
+
+        try:  # Check needed if the string has been consumed, need to check for lambda transition
+            current_char = user_string[user_string_index]
+        except IndexError:  # The string index is greater than the string length, string has been consumed, check for lambda or return false
+            current_char = -1
+            temp_state = self.get_lambda_transition(current_state.name)
+
+            if current_state == 0:  # If the transition was null, the string is not accepted
+                return False
+            else:
+                for node in temp_state.nodes:  # Loop through each node in the node collection
+
+                    if self.do_stack_action(node.stack_action):
+                        print(f"Current node: {node}, index: {user_string_index}, stack: {self.pda_stack}")
+                        chars_left = len(user_string) - (user_string_index + 1)
+                        print(f"Characters left: {chars_left}")
+                        if node.is_final and len(self.pda_stack) == 0:  # If the current node is terminal, the stack is empty and there are no more characters left
+                            return True
+                        else:  # Since the string has been consumed, there cannot be more to traverse in the table.
+                            # return False
+                            res = self.traverse(node, user_string, user_string_index, self.pda_stack)
+                            
+                    else:
+                        return False
 
         # Get the first transition from the starting state
         current_char = user_string[user_string_index]
         current_state = self.get_transition(current_state.name, current_char)
         current_stack = self.pda_stack
         res = False
+
+        # res = self.traverse(current_state, user_string, user_string_index, current_stack)
 
         if current_state == 0:
             return False
@@ -143,32 +201,10 @@ class PDA:
                             res = self.traverse(node, user_string, user_string_index + 1, current_stack)
                 else:
                     return False
-                
-
-        # while(traverse_table_bool):
-        #     if current_state == 0:  # Check if the state is empty on a character
-        #         print("Encountered character that cannot be accepted at a state.")
-        #         # traverse_table_bool = False
-        #         break
-        #     else:  # There is a transition on that character
-        #         if self.is_lambda:  # If the last transition was a lambda transition
-        #             for node in current_state.nodes:
-        #                 print(node)
-        #                 temp_states.append(node)
-        #         else:  # It was not a lambda transition
-
-        #     # current_char = user_string[user_string_index]
-        #     # if self.is_lambda:  # If the last transition was a lambda transition
-        #     #     for state in current_state
-
-        #     # current_state = self.get_transition(current_state.name, current_char)
-
-        #     if current_state == 0:  # Check if the state is empty on a character
-        #         print("Encountered character that cannot be accepted at a state.")
-        #         # traverse_table_bool = False
-        #         break
-        #     # if current_state.count > 2:  # If this is a mult. state transition
         
+        self.pda_stack = []
+        self.is_lambda = False
+
         return res
 
 
@@ -187,9 +223,27 @@ class PDA:
 
         # If the character to transition on is empty, check if there is a lambda transition
         if trans_state == 0:
-            col = self.alphabet.index("E") + 1
-            trans_state = self.pda_trans_table[row][col]
+            col = self.alphabet.index("E") + 1  # Set the column to the lambda column
+            trans_state = self.pda_trans_table[row][col]  # Get the transition
+            if trans_state != 0:  # If there was a lambda transition
+                self.is_lambda = True
+                print(f"Transition is lambda for: {state} to {trans_state}")
+
+        return trans_state
+
+
+    def get_lambda_transition(self, state):
+        """
+        Work-around for when all the characters are consumed but need to check
+        if there is a lambda transition
+        """
+        self.is_lambda = False
+        row = self.pda_states.index(state) + 1
+        col = self.alphabet.index("E") + 1  # Set the column to the lambda column
+        trans_state = self.pda_trans_table[row][col]  # Get the transition
+        if trans_state != 0:  # If there was a lambda transition
             self.is_lambda = True
+            print(f"Transition is lambda for: {state} to {trans_state}")
 
         return trans_state
 

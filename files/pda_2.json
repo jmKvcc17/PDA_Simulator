@@ -16,7 +16,8 @@
         "q1"
     ],
     "end_state": [
-        "q4"
+        "q4",
+        "q5"
     ],
     "transitions": [
         ["q1", "E", "q2", "E", "Z"],
