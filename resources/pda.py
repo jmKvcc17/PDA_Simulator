@@ -48,10 +48,8 @@ class PDA:
                     print("String accepted.")
                 else:
                     print("String rejected.")
-            except IndexError:
-                print(f"Index error with string: {string}")
-            except AttributeError:
-                print(f"Atribute error with string: {string}")
+            except Exception as e:
+                print(f"Exception with string {string}: {e}")
 
         print("End.")
 
@@ -86,120 +84,65 @@ class PDA:
             if self.pda_stack[stack_length] == stack_action[0]:  # If the top character of the stack matches
                 self.pda_stack.pop()  # Remove the character from the stack
                 return True
-            else:
+            else:  # The top character of the stack does not meet the requirements to be popped
                 return False
 
         return False
 
-    def traverse(self, current_state, user_string, user_string_index, curr_stack):
-        """
-        Recursive function that traverses the PDA and performs the necessary functions to the
-        string and stack.
-        """
-        # -print(f"Before checks index: {user_string_index}")
 
-        try:  # Check needed if the string has been consumed, need to check for lambda transition
-            current_char = user_string[user_string_index]
-        except IndexError:  # The string index is greater than the string length, string has been consumed, check for lambda or return false
-            current_char = -1
-            temp_state = self.get_lambda_transition(current_state.name)
+    def traverse(self, current_state, user_string, curr_stack):
 
-            if current_state == 0:  # If the transition was null, the string is not accepted
-                return False
-            else:
-                for node in temp_state.nodes:  # Loop through each node in the node collection
-
-                    if self.do_stack_action(node.stack_action):
-                        # -print(f"Current node: {node}, index: {user_string_index}, stack: {curr_stack}")
-                        chars_left = len(user_string) - (user_string_index + 1)
-                        # -print(f"Characters left: {chars_left}")
-                        if node.is_final and len(curr_stack) == 0:  # If the current node is terminal, the stack is empty and there are no more characters left
-                            return True
-                        else:  # Since the string has been consumed, there cannot be more to traverse in the table.
-                            # return False
-                            res = self.traverse(node, user_string, user_string_index, curr_stack)
-                            
-                    else:
-                        return False
-
-        # -print(f"Current character: \"{current_char}\"")
-        current_state = self.get_transition(current_state.name, current_char)
-        current_stack = curr_stack
-        res = False
-
-        if current_state == 0:  # If the transition was null, the string is not accepted
+        if current_state == 0:  # If the state is null, traverse failed
             return False
         else:
-            for node in current_state.nodes:  # Loop 
+            for state in current_state.nodes:
+                
+                if len(user_string) == 0:
+                    next_state = self.get_transition(state.name, "")
 
-                if self.do_stack_action(node.stack_action):
-                    # -print(f"Current node: {node}, index: {user_string_index}, stack: {curr_stack}")
-                    chars_left = len(user_string) - (user_string_index + 1)
-                    # -print(f"Characters left: {chars_left}")
-                    if node.is_final and len(current_stack) == 0 and chars_left <= 0:  # If the current node is terminal, the stack is empty and there are no more characters left
-                        return True
-                    else:  # There is more to traverse
-                        if self.is_lambda:  # If the transition was lambda, don't move to the next character in the string yet
-                            res = self.traverse(node, user_string, user_string_index, current_stack)
-                        else:  # The transition was not lambda, consume the character and increment the string index
-                            res = self.traverse(node, user_string, user_string_index + 1, current_stack)
-                else:
+                next_state = self.get_transition(state.name, user_string[0])  # Get the next state to travse
+
+                if self.do_stack_action(state.stack_action):  # If the stack action is successful
+                    if state.is_final:  # If the state is final
+                        # if self.get_lambda_transition(state.name) == 0:  # If there are no lambda transitions
+                        if len(user_string) == 0:  # If the string has been read
+                            if len(curr_stack) == 0:  # If the stack has been cleared
+                                return True  # Then the string is accepted.
+                else:  # If the stack action failed
                     return False
-
-        return res
 
 
     def traverse_table(self, user_string):
-        user_string_index = 0
         current_state = self.pda_trans_table[1][0]  # Set the initial state to the starting state
+        print(current_state)
 
-        try:  # Check needed if the string has been consumed, need to check for lambda transition
-            current_char = user_string[user_string_index]
-        except IndexError:  # The string index is greater than the string length, string has been consumed, check for lambda or return false
-            current_char = -1
-            temp_state = self.get_lambda_transition(current_state.name)
+        if (len(user_string) == 0):
+            current_state = self.get_transition(current_state.name, "")
 
-            if current_state == 0:  # If the transition was null, the string is not accepted
-                return False
-            else:
-                for node in temp_state.nodes:  # Loop through each node in the node collection
+        current_state = self.get_transition(current_state.name, user_string[0])  # Get the next state to travse 
 
-                    if self.do_stack_action(node.stack_action):
-                        print(f"Current node: {node}, index: {user_string_index}, stack: {self.pda_stack}")
-                        chars_left = len(user_string) - (user_string_index + 1)
-                        print(f"Characters left: {chars_left}")
-                        if node.is_final and len(self.pda_stack) == 0:  # If the current node is terminal, the stack is empty and there are no more characters left
-                            return True
-                        else:  # Since the string has been consumed, there cannot be more to traverse in the table.
-                            # return False
-                            res = self.traverse(node, user_string, user_string_index, self.pda_stack)
-                            
-                    else:
-                        return False
-
-        # Get the first transition from the starting state
-        current_char = user_string[user_string_index]
-        current_state = self.get_transition(current_state.name, current_char)
-        current_stack = self.pda_stack
         res = False
 
-        # res = self.traverse(current_state, user_string, user_string_index, current_stack)
+        # # res = self.traverse(current_state, user_string, user_string_index, current_stack)
+
+        print(f"Traverse table state: {current_state}")
 
         if current_state == 0:
             return False
         else:
-            for node in current_state.nodes:
-                if self.do_stack_action(node.stack_action):
-                    print(f"Current node: {node}, index: {user_string_index}, stack: {current_stack}")
-                    chars_left = len(user_string) - (user_string_index + 1)
-                    if node.is_final and len(current_stack) == 0 and chars_left == 0:  # If the current node is terminal, the stack is empty and there are no more characters left
-                        return True
-                    else:  # There is more to traverse
-                        if self.is_lambda:  # If the transition was lambda, don't move to the next character in the string yet
-                            res = self.traverse(node, user_string, user_string_index, current_stack)
-                        else:  # The transition was not lambda, consume the character and increment the string index
-                            res = self.traverse(node, user_string, user_string_index + 1, current_stack)
-                else:
+            for state in current_state.nodes:
+                try:
+                    next_state = self.get_transition(state.name, user_string[0])  # Get the next state to travse
+                except IndexError:  # The string was empty, send the empty string
+                    next_state = self.get_transition(state.name, "")
+
+                if self.do_stack_action(state.stack_action):  # If the stack action is successful
+                    if state.is_final:  # If the state is final
+                        # if self.get_lambda_transition(state.name) == 0:  # If there are no lambda transitions
+                        if len(user_string) == 0:  # If the string has been read
+                            if len(self.pda_stack) == 0:  # If the stack has been cleared
+                                return True  # Then the string is accepted.
+                else:  # If the stack action failed
                     return False
         
         self.pda_stack = []
@@ -215,11 +158,15 @@ class PDA:
         """
         self.is_lambda = False
 
-        # get the state index
-        row = self.pda_states.index(state) + 1
-        col = self.alphabet.index(char) + 1
+        try:
+            # get the state index
+            row = self.pda_states.index(state) + 1
+            col = self.alphabet.index(char) + 1
 
-        trans_state = self.pda_trans_table[row][col]  # Is a node object
+            trans_state = self.pda_trans_table[row][col]  # Is a node object
+        except:  # Catch any potential errors, assume the character was null
+            print(f"Character trying to traverse on: {char}")
+            trans_state = 0
 
         # If the character to transition on is empty, check if there is a lambda transition
         if trans_state == 0:
