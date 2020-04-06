@@ -117,12 +117,18 @@ class PDA:
 
                     if self.is_lambda:  # If the next state trans. on lambda, don't remove a character
                         res = self.traverse(next_state, user_string, self.pda_stack)
+                        if res:
+                            break
                     else:
                         if len(user_string) == 0:
                             res = self.traverse(next_state, user_string, self.pda_stack)
+                            if res:
+                                break
                         else:
                             print("[traverse]: Removing character and traversing.")
                             res = self.traverse(next_state, user_string[1:], self.pda_stack)
+                            if res:
+                                break
                 else:  # If the stack action failed
                     return False
 
@@ -161,10 +167,10 @@ class PDA:
         The transition state is a NodeCollection object, so it could have multiple nodes in it
         """
         self.is_lambda = False
-
+        row = self.pda_states.index(state) + 1
         try:
             # get the state index
-            row = self.pda_states.index(state) + 1
+            
             col = self.alphabet.index(char) + 1
 
             trans_state = self.pda_trans_table[row][col]  # Is a node object
