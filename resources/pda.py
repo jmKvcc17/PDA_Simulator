@@ -51,6 +51,9 @@ class PDA:
             except Exception as e:
                 print(f"Exception with string {string}: {e}")
 
+            print()
+
+        print()
         print("End.")
 
     def check_if_start(self, state):
@@ -98,7 +101,7 @@ class PDA:
             return False
         else:
             for state in current_state.nodes:
-                print(f"Current state: {state}, Current stack: {curr_stack}, Current string: {user_string}")
+                print(f"Current state: {state}, Current stack: {curr_stack}, Current string: \"{user_string}\"")
                 
                 if len(user_string) == 0:
                     next_state = self.get_transition(state.name, "")
@@ -118,7 +121,8 @@ class PDA:
                         if len(user_string) == 0:
                             res = self.traverse(next_state, user_string, self.pda_stack)
                         else:
-                            res = self.traverse(next_state, user_string[:1], self.pda_stack)
+                            print("[traverse]: Removing character and traversing.")
+                            res = self.traverse(next_state, user_string[1:], self.pda_stack)
                 else:  # If the stack action failed
                     return False
 
@@ -142,7 +146,8 @@ class PDA:
             if len(user_string) == 0:  # if the string is empty
                 res = self.traverse(current_state, user_string, self.pda_stack)
             else:
-                res = self.traverse(current_state, user_string[:1], self.pda_stack)
+                print("Removing character and traversing.")
+                res = self.traverse(current_state, user_string[1:], self.pda_stack)
         
         self.pda_stack = []
         self.is_lambda = False
