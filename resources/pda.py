@@ -69,7 +69,7 @@ class PDA:
         except ValueError:
             return False
 
-    def do_stack_action(self, stack_action):
+    def do_stack_action(self, stack_action, curr_stack):
         """
         Checks a node's stack action.
         Will push or pop from the pda's stack.
@@ -77,15 +77,19 @@ class PDA:
         if stack_action[0] == 'E' and stack_action[1] == 'E':  # If the action is to do nothing
             return True
         if stack_action[0] == 'E' and stack_action[1] != 'E':  # If the action is to add to the stack
-            self.pda_stack.append(stack_action[1])
+            # self.pda_stack.append(stack_action[1])
+            curr_stack.append(stack_action[1])
             return True
         if stack_action[0] != 'E' and stack_action[1] == 'E':  # If the action is to pop from the stack
-            if len(self.pda_stack) == 0:  # If the length of the stack is zero, then the action fails
+            # if len(self.pda_stack) == 0:  # If the length of the stack is zero, then the action fails
+            if len(curr_stack) == 0:
                 return False
             
             stack_length = len(self.pda_stack) - 1  # Get the index of the top element of the stack
-            if self.pda_stack[stack_length] == stack_action[0]:  # If the top character of the stack matches
-                self.pda_stack.pop()  # Remove the character from the stack
+            # if self.pda_stack[stack_length] == stack_action[0]:  # If the top character of the stack matches
+            if curr_stack[stack_length] == stack_action[0]:
+                # self.pda_stack.pop()  # Remove the character from the stack
+                curr_stack.pop()
                 return True
             else:  # The top character of the stack does not meet the requirements to be popped
                 return False
@@ -108,7 +112,7 @@ class PDA:
                 else:
                     next_state = self.get_transition(state.name, user_string[0])  # Get the next state to travse
 
-                if self.do_stack_action(state.stack_action):  # If the stack action is successful
+                if self.do_stack_action(state.stack_action, curr_stack):  # If the stack action is successful
                     if state.is_final:  # If the state is final
                         # if self.get_lambda_transition(state.name) == 0:  # If there are no lambda transitions
                         if len(user_string) == 0:  # If the string has been read
@@ -116,21 +120,26 @@ class PDA:
                                 return True  # Then the string is accepted.
 
                     if self.is_lambda:  # If the next state trans. on lambda, don't remove a character
-                        res = self.traverse(next_state, user_string, self.pda_stack)
+                        # res = self.traverse(next_state, user_string, self.pda_stack)
+                        res = self.traverse(next_state, user_string, curr_stack)
                         if res:
                             break
                     else:
                         if len(user_string) == 0:
-                            res = self.traverse(next_state, user_string, self.pda_stack)
+                            # res = self.traverse(next_state, user_string, self.pda_stack)
+                            res = self.traverse(next_state, user_string, curr_stack)
                             if res:
                                 break
                         else:
                             print("[traverse]: Removing character and traversing.")
-                            res = self.traverse(next_state, user_string[1:], self.pda_stack)
+                            # res = self.traverse(next_state, user_string[1:], self.pda_stack)
+                            res = self.traverse(next_state, user_string[1:], curr_stack)
                             if res:
                                 break
                 else:  # If the stack action failed
                     return False
+
+                curr_stack = []  # The previous path failed, reset the stack for the next state to traverse
 
         return res
 
