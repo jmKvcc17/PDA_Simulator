@@ -92,15 +92,18 @@ class PDA:
 
     def traverse(self, current_state, user_string, curr_stack):
 
+        res = False
+
         if current_state == 0:  # If the state is null, traverse failed
             return False
         else:
             for state in current_state.nodes:
+                print(f"Current state: {state}, Current stack: {curr_stack}, Current string: {user_string}")
                 
                 if len(user_string) == 0:
                     next_state = self.get_transition(state.name, "")
-
-                next_state = self.get_transition(state.name, user_string[0])  # Get the next state to travse
+                else:
+                    next_state = self.get_transition(state.name, user_string[0])  # Get the next state to travse
 
                 if self.do_stack_action(state.stack_action):  # If the stack action is successful
                     if state.is_final:  # If the state is final
@@ -108,42 +111,38 @@ class PDA:
                         if len(user_string) == 0:  # If the string has been read
                             if len(curr_stack) == 0:  # If the stack has been cleared
                                 return True  # Then the string is accepted.
+
+                    if self.is_lambda:  # If the next state trans. on lambda, don't remove a character
+                        res = self.traverse(next_state, user_string, self.pda_stack)
+                    else:
+                        if len(user_string) == 0:
+                            res = self.traverse(next_state, user_string, self.pda_stack)
+                        else:
+                            res = self.traverse(next_state, user_string[:1], self.pda_stack)
                 else:  # If the stack action failed
                     return False
+
+        return res
 
 
     def traverse_table(self, user_string):
-        current_state = self.pda_trans_table[1][0]  # Set the initial state to the starting state
-        print(current_state)
-
-        if (len(user_string) == 0):
-            current_state = self.get_transition(current_state.name, "")
-
-        current_state = self.get_transition(current_state.name, user_string[0])  # Get the next state to travse 
-
         res = False
 
-        # # res = self.traverse(current_state, user_string, user_string_index, current_stack)
+        current_state = self.pda_trans_table[1][0]  # Set the initial state to the starting state
 
-        print(f"Traverse table state: {current_state}")
-
-        if current_state == 0:
-            return False
+        # Get the first transition for the initial state
+        if (len(user_string) == 0):
+            current_state = self.get_transition(current_state.name, "")
         else:
-            for state in current_state.nodes:
-                try:
-                    next_state = self.get_transition(state.name, user_string[0])  # Get the next state to travse
-                except IndexError:  # The string was empty, send the empty string
-                    next_state = self.get_transition(state.name, "")
+            current_state = self.get_transition(current_state.name, user_string[0])  # Get the next state to travse 
 
-                if self.do_stack_action(state.stack_action):  # If the stack action is successful
-                    if state.is_final:  # If the state is final
-                        # if self.get_lambda_transition(state.name) == 0:  # If there are no lambda transitions
-                        if len(user_string) == 0:  # If the string has been read
-                            if len(self.pda_stack) == 0:  # If the stack has been cleared
-                                return True  # Then the string is accepted.
-                else:  # If the stack action failed
-                    return False
+        if self.is_lambda:  # If the next state trans. on lambda, don't remove a character
+            res = self.traverse(current_state, user_string, self.pda_stack)
+        else:
+            if len(user_string) == 0:  # if the string is empty
+                res = self.traverse(current_state, user_string, self.pda_stack)
+            else:
+                res = self.traverse(current_state, user_string[:1], self.pda_stack)
         
         self.pda_stack = []
         self.is_lambda = False
