@@ -24,27 +24,47 @@ class PDA:
         # NFA and DFA construction
         self.parse_data()  # Get data from the JSON file
 
+        print("Creating PDA...")
         # NFA construction
         self.pda_num_rows = len(self.pda_states) + 1
         self.pda_num_cols = len(self.alphabet) + 1
         self.pda_trans_table = [[0 for x in range(self.pda_num_cols)] for y in range(self.pda_num_rows)]
         self.construct_trans_table(self.pda_trans_table, self.pda_num_rows, self.pda_num_cols, self.pda_transitions, self.pda_states)
-        self.print_transition_table(self.pda_trans_table, self.pda_num_rows, self.pda_num_cols)
+        # self.print_transition_table(self.pda_trans_table, self.pda_num_rows, self.pda_num_cols)
+
+        print("End of PDA simulation.")
+        print()
+
+    def check_strings(self):
+        """
+        Loop through all strings and check if they are accepted by the PDA
+        """
+        if len(self.strings) == 0:
+            print("No strings to test.")
+            return False
 
         for string in self.strings:
-            try:
-                print(f"Using string: {string}")
-                if self.traverse_table(string):
-                    print("String accepted.")
-                else:
-                    print("String rejected.")
-            except Exception as e:
-                print(f"Exception with string {string}: {e}")
-
+            self.check_string(string)
             print()
 
-        print()
-        print("End.")
+        return True
+      
+
+    def check_string(self, string):
+        ret = False
+
+        try:
+            print(f"Using string: {string}")
+            if self.traverse_table(string):
+                print("String accepted.")
+                ret = True
+            else:
+                print("String rejected.")
+        except Exception as e:
+            print(f"Exception with string {string}: {e}")
+
+        return ret
+
 
     def check_if_start(self, state):
         if state == self.start_state[0]:
