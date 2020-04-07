@@ -32,8 +32,10 @@ class PDA:
         self.construct_trans_table(self.pda_trans_table, self.pda_num_rows, self.pda_num_cols, self.pda_transitions, self.pda_states)
         # self.print_transition_table(self.pda_trans_table, self.pda_num_rows, self.pda_num_cols)
 
-        print("End of PDA simulation.")
         print()
+
+    def user_print_transition_table(self):
+        self.print_transition_table(self.pda_trans_table, self.pda_num_rows, self.pda_num_cols)
 
     def check_strings(self):
         """
