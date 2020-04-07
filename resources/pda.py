@@ -31,16 +31,6 @@ class PDA:
         self.construct_trans_table(self.pda_trans_table, self.pda_num_rows, self.pda_num_cols, self.pda_transitions, self.pda_states)
         self.print_transition_table(self.pda_trans_table, self.pda_num_rows, self.pda_num_cols)
 
-        # self.pda_stack.append('A')
-        # print(self.do_stack_action(['E', 'E']))
-        # print(self.pda_stack)
-        # print(self.do_stack_action(['E', 'A']))
-        # print(self.pda_stack)
-        # print(self.do_stack_action(['A', 'E']))
-        # print(self.pda_stack)
-        # print(self.do_stack_action(['B', 'E']))
-        # print(self.pda_stack)
-
         for string in self.strings:
             try:
                 print(f"Using string: {string}")
@@ -74,21 +64,17 @@ class PDA:
         Checks a node's stack action.
         Will push or pop from the pda's stack.
         """
-        if stack_action[0] == 'E' and stack_action[1] == 'E':  # If the action is to do nothing
+        if stack_action[0] == stack_action[1]:  # If the action is to do nothing
             return True
         if stack_action[0] == 'E' and stack_action[1] != 'E':  # If the action is to add to the stack
-            # self.pda_stack.append(stack_action[1])
             curr_stack.append(stack_action[1])
             return True
         if stack_action[0] != 'E' and stack_action[1] == 'E':  # If the action is to pop from the stack
-            # if len(self.pda_stack) == 0:  # If the length of the stack is zero, then the action fails
             if len(curr_stack) == 0:
                 return False
             
             stack_length = len(self.pda_stack) - 1  # Get the index of the top element of the stack
-            # if self.pda_stack[stack_length] == stack_action[0]:  # If the top character of the stack matches
             if curr_stack[stack_length] == stack_action[0]:
-                # self.pda_stack.pop()  # Remove the character from the stack
                 curr_stack.pop()
                 return True
             else:  # The top character of the stack does not meet the requirements to be popped
@@ -105,7 +91,7 @@ class PDA:
             return False
         else:
             for state in current_state.nodes:
-                print(f"Current state: {state}, Current stack: {curr_stack}, Current string: \"{user_string}\"")
+                # print(f"Current state: {state}, Current stack: {curr_stack}, Current string: \"{user_string}\"")
                 
                 if len(user_string) == 0:
                     next_state = self.get_transition(state.name, "")
@@ -114,30 +100,31 @@ class PDA:
 
                 if self.do_stack_action(state.stack_action, curr_stack):  # If the stack action is successful
                     if state.is_final:  # If the state is final
-                        # if self.get_lambda_transition(state.name) == 0:  # If there are no lambda transitions
                         if len(user_string) == 0:  # If the string has been read
                             if len(curr_stack) == 0:  # If the stack has been cleared
                                 return True  # Then the string is accepted.
 
                     if self.is_lambda:  # If the next state trans. on lambda, don't remove a character
-                        # res = self.traverse(next_state, user_string, self.pda_stack)
                         res = self.traverse(next_state, user_string, curr_stack)
                         if res:
                             break
                     else:
                         if len(user_string) == 0:
-                            # res = self.traverse(next_state, user_string, self.pda_stack)
                             res = self.traverse(next_state, user_string, curr_stack)
                             if res:
                                 break
                         else:
-                            print("[traverse]: Removing character and traversing.")
-                            # res = self.traverse(next_state, user_string[1:], self.pda_stack)
+                            # print("[traverse]: Removing character and traversing.")
                             res = self.traverse(next_state, user_string[1:], curr_stack)
                             if res:
                                 break
                 else:  # If the stack action failed
-                    return False
+                    # print("Stack action failed. Moving on.")
+
+                    if next_state.count > 0:  # If there are still potential states to check for an accepting stack action, try them
+                        continue
+                    else:  # This was the only state to check, therefore it fails to accept the string.
+                        return False
 
                 curr_stack = []  # The previous path failed, reset the stack for the next state to traverse
 
@@ -145,6 +132,10 @@ class PDA:
 
 
     def traverse_table(self, user_string):
+        """
+        Accepts a user's string a recursively traverses the transition table to 
+        see if it is accepted by the PDA.
+        """
         res = False
 
         current_state = self.pda_trans_table[1][0]  # Set the initial state to the starting state
@@ -161,7 +152,7 @@ class PDA:
             if len(user_string) == 0:  # if the string is empty
                 res = self.traverse(current_state, user_string, self.pda_stack)
             else:
-                print("Removing character and traversing.")
+                # print("Removing character and traversing.")
                 res = self.traverse(current_state, user_string[1:], self.pda_stack)
         
         self.pda_stack = []
@@ -184,7 +175,7 @@ class PDA:
 
             trans_state = self.pda_trans_table[row][col]  # Is a node object
         except:  # Catch any potential errors, assume the character was null
-            print(f"Character trying to traverse on: {char}")
+            # print(f"Character trying to traverse on: {char}")
             trans_state = 0
 
         # If the character to transition on is empty, check if there is a lambda transition
@@ -193,23 +184,7 @@ class PDA:
             trans_state = self.pda_trans_table[row][col]  # Get the transition
             if trans_state != 0:  # If there was a lambda transition
                 self.is_lambda = True
-                print(f"Transition is lambda for: {state} to {trans_state}")
-
-        return trans_state
-
-
-    def get_lambda_transition(self, state):
-        """
-        Work-around for when all the characters are consumed but need to check
-        if there is a lambda transition
-        """
-        self.is_lambda = False
-        row = self.pda_states.index(state) + 1
-        col = self.alphabet.index("E") + 1  # Set the column to the lambda column
-        trans_state = self.pda_trans_table[row][col]  # Get the transition
-        if trans_state != 0:  # If there was a lambda transition
-            self.is_lambda = True
-            print(f"Transition is lambda for: {state} to {trans_state}")
+                # print(f"Transition is lambda for: {state} to {trans_state}")
 
         return trans_state
 

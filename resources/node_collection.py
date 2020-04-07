@@ -31,7 +31,7 @@ class NodeCollection:
         nodes = ""
         if self.count > 0:
             for n in self.nodes:
-                nodes += str(n)
+                nodes += str(n) + " "
             return nodes
         else:
             return "No Nodes."
