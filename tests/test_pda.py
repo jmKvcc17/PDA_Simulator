@@ -8,7 +8,6 @@ class TestPDASimulator(unittest.TestCase):
         file_dir = './files/'
 
         test1 = pda.PDA(json_reader.read_file(file_dir + 'pda_1_edit.json'))
-
         self.assertTrue(test1.check_string(""))
         self.assertTrue(test1.check_string("0"))
         self.assertFalse(test1.check_string("1"))
@@ -21,7 +20,9 @@ class TestPDASimulator(unittest.TestCase):
 
         test2 = pda.PDA(json_reader.read_file(file_dir + 'pda_7_2_2.json'))
         self.assertTrue(test2.check_string(""))
+        self.assertFalse(test2.check_string("a"))
         self.assertTrue(test2.check_string("abba"))
+
 
 
 if __name__ == '__main__':

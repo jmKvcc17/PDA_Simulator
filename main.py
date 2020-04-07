@@ -2,13 +2,9 @@ import os, sys
 from resources import json_reader, pda, menu
 
 
-
-if __name__ == "__main__":
-
+def main_loop():
     file_dir = './files/'
     user_input = ""
-    # test1 = pda.PDA(json_reader.read_file(file_dir + 'pda_1_edit.json'))
-    # test1.check_strings()
 
     for file in os.listdir(file_dir):
         data = json_reader.read_file(file_dir + file)
@@ -33,7 +29,7 @@ if __name__ == "__main__":
                 user_pda.check_string(user_string)
             elif user_input == '3':  # Print the transition table
                 user_pda.user_print_transition_table()
-            elif user_input == '4':
+            elif user_input == '4':  # Skip to the next file
                 break
             elif user_input == '5':  # Exit the program
                 sys.exit()
@@ -43,5 +39,18 @@ if __name__ == "__main__":
             print()
             menu.print_menu()
             user_input = menu.get_user_input()
+
+
+if __name__ == "__main__":
+    # main_loop()
+
+    file_dir = './files/'
+    data = json_reader.read_file(file_dir + 'pda_7_2_2.json')
+
+    user_pda = pda.PDA(data)  # Create the PDA
+
+    user_pda.check_strings()
+
+    
 
         

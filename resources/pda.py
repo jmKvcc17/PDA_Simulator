@@ -1,4 +1,5 @@
 import json
+import traceback
 from .node import Node
 from .node_collection import NodeCollection
 
@@ -64,6 +65,7 @@ class PDA:
                 print("String rejected.")
         except Exception as e:
             print(f"Exception with string {string}: {e}")
+            print(traceback.format_exc())
 
         return ret
 
@@ -95,7 +97,7 @@ class PDA:
             if len(curr_stack) == 0:
                 return False
             
-            stack_length = len(self.pda_stack) - 1  # Get the index of the top element of the stack
+            stack_length = len(curr_stack) - 1  # Get the index of the top element of the stack
             if curr_stack[stack_length] == stack_action[0]:
                 curr_stack.pop()
                 return True
@@ -142,7 +144,9 @@ class PDA:
                                 break
                 else:  # If the stack action failed
                     # print("Stack action failed. Moving on.")
-
+                    if next_state == 0:
+                        return False
+                    
                     if next_state.count > 0:  # If there are still potential states to check for an accepting stack action, try them
                         continue
                     else:  # This was the only state to check, therefore it fails to accept the string.
@@ -161,6 +165,7 @@ class PDA:
         res = False
 
         current_state = self.pda_trans_table[1][0]  # Set the initial state to the starting state
+        curr_stack = self.pda_stack
 
         # Get the first transition for the initial state
         if (len(user_string) == 0):
@@ -169,13 +174,13 @@ class PDA:
             current_state = self.get_transition(current_state.name, user_string[0])  # Get the next state to travse 
 
         if self.is_lambda:  # If the next state trans. on lambda, don't remove a character
-            res = self.traverse(current_state, user_string, self.pda_stack)
+            res = self.traverse(current_state, user_string, curr_stack)
         else:
             if len(user_string) == 0:  # if the string is empty
-                res = self.traverse(current_state, user_string, self.pda_stack)
+                res = self.traverse(current_state, user_string, curr_stack)
             else:
                 # print("Removing character and traversing.")
-                res = self.traverse(current_state, user_string[1:], self.pda_stack)
+                res = self.traverse(current_state, user_string[1:], curr_stack)
         
         self.pda_stack = []
         self.is_lambda = False

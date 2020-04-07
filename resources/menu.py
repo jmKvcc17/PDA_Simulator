@@ -10,7 +10,7 @@ def print_menu():
     print("1. Loop through strings in JSON file")
     print("2. Enter in string manually")
     print("3. Print PDA transition table")
-    print("4. Move to next file in file directory.")
+    print("4. Move to next file in files/ directory.")
     print("5. Exit program")
 
 
@@ -30,7 +30,7 @@ def get_user_string():
     """
     Gets the user's desired string
     """
-    ret = input("Enter in a string to test (just press ENTER for the empty string): ")
+    ret = input("Enter in a string to test (for the empty string only press ENTER): ")
 
     return ret
 
