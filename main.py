@@ -28,6 +28,7 @@ def main_loop():
                 user_string = menu.get_user_string()
                 user_pda.check_string(user_string)
             elif user_input == '3':  # Print the transition table
+                menu.print_transition_table_info(file)
                 user_pda.user_print_transition_table()
             elif user_input == '4':  # Skip to the next file
                 break
@@ -42,7 +43,7 @@ def main_loop():
 
 
 if __name__ == "__main__":
-    # main_loop()
+    main_loop()
 
     file_dir = './files/'
     data = json_reader.read_file(file_dir + 'pda_7_2_2.json')

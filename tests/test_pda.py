@@ -22,6 +22,8 @@ class TestPDASimulator(unittest.TestCase):
         self.assertTrue(test2.check_string(""))
         self.assertFalse(test2.check_string("a"))
         self.assertTrue(test2.check_string("abba"))
+        self.assertTrue(test2.check_string("abab"))
+        self.assertTrue(test2.check_string("baba"))
 
 
 

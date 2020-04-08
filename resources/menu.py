@@ -13,6 +13,12 @@ def print_menu():
     print("4. Move to next file in files/ directory.")
     print("5. Exit program")
 
+def print_transition_table_info(filename):
+    print(f"Transition table for {filename}")
+    print("Each cell in the table is comprised of a state to transtion on the character in the column as well as the action to perform on the stack.")
+    print("Ex: q1 (E/E) under column 'a', would mean to transition to state q1 on a and replace lambda with labmda.")
+    print("* Note: Formatting may be off on non-deterministic PDAs with many transitions on one character.")
+
 
 def get_user_input():
     """

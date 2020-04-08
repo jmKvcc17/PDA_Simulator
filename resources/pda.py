@@ -117,7 +117,7 @@ class PDA:
             for state in current_state.nodes:
                 # print(f"Current state: {state}, Current stack: {curr_stack}, Current string: \"{user_string}\"")
                 
-                if len(user_string) == 0:
+                if len(user_string) == 0:  # If the string is empty, see if there is a lambda transition
                     next_state = self.get_transition(state.name, "")
                 else:
                     next_state = self.get_transition(state.name, user_string[0])  # Get the next state to travse
@@ -126,11 +126,11 @@ class PDA:
                     if state.is_final:  # If the state is final
                         if len(user_string) == 0:  # If the string has been read
                             if len(curr_stack) == 0:  # If the stack has been cleared
-                                return True  # Then the string is accepted.
+                                return True  # Base case, 3 conditions met, the string is accepted.
 
                     if self.is_lambda:  # If the next state trans. on lambda, don't remove a character
                         res = self.traverse(next_state, user_string, curr_stack)
-                        if res:
+                        if res:  # Base case, the 
                             break
                     else:
                         if len(user_string) == 0:
