@@ -56,18 +56,39 @@ class PDA:
     def check_string(self, string):
         ret = False
 
-        try:
-            print(f"Using string: {string}")
-            if self.traverse_table(string):
-                print("String accepted.")
-                ret = True
-            else:
-                print("String rejected.")
-        except Exception as e:
-            print(f"Exception with string {string}: {e}")
-            print(traceback.format_exc())
+        if self.check_if_in_alphabet(string):
+            try:
+                print(f"Using string: {string}")
+                if self.traverse_table(string):
+                    print("String accepted.")
+                    ret = True
+                else:
+                    print("String rejected.")
+            except Exception as e:
+                print(f"Exception with string {string}: {e}")
+                print(traceback.format_exc())
 
         return ret
+
+    def check_if_in_alphabet(self, string):
+        """
+        Check each character in the string to make sure it is in the alphabet before testing it
+        """
+        ret = True
+
+        if len(string) == 0:
+            return ret
+
+        for char in string:
+            if char in self.alphabet:
+                continue
+            else:
+                print("String contains characters not defined in the alphabet.")
+                ret = False
+                break
+
+        return ret
+
 
 
     def check_if_start(self, state):
@@ -115,7 +136,7 @@ class PDA:
             return False
         else:
             for state in current_state.nodes:
-                # print(f"Current state: {state}, Current stack: {curr_stack}, Current string: \"{user_string}\"")
+                if self.print_computation: print(f"Current state: {state}, Current stack: {curr_stack}, Current string: \"{user_string}\"")
                 
                 if len(user_string) == 0:  # If the string is empty, see if there is a lambda transition
                     next_state = self.get_transition(state.name, "")
@@ -133,15 +154,9 @@ class PDA:
                         if res:  # Base case, the 
                             break
                     else:
-                        if len(user_string) == 0:
-                            res = self.traverse(next_state, user_string, curr_stack)
-                            if res:
-                                break
-                        else:
-                            # print("[traverse]: Removing character and traversing.")
-                            res = self.traverse(next_state, user_string[1:], curr_stack)
-                            if res:
-                                break
+                        res = self.traverse(next_state, user_string[1:], curr_stack)
+                        if res:
+                            break
                 else:  # If the stack action failed
                     # print("Stack action failed. Moving on.")
                     if next_state == 0:
@@ -175,12 +190,8 @@ class PDA:
 
         if self.is_lambda:  # If the next state trans. on lambda, don't remove a character
             res = self.traverse(current_state, user_string, curr_stack)
-        else:
-            if len(user_string) == 0:  # if the string is empty
-                res = self.traverse(current_state, user_string, curr_stack)
-            else:
-                # print("Removing character and traversing.")
-                res = self.traverse(current_state, user_string[1:], curr_stack)
+        else:  # The transition has a character to transition on
+            res = self.traverse(current_state, user_string[1:], curr_stack)
         
         self.pda_stack = []
         self.is_lambda = False
@@ -193,16 +204,17 @@ class PDA:
         Given a starting state and a character, will return the transition state.
         The transition state is a NodeCollection object, so it could have multiple nodes in it
         """
+        if self.print_computation: print(f"Character trying to traverse on: {char}")
+
         self.is_lambda = False
         row = self.pda_states.index(state) + 1
         try:
             # get the state index
-            
             col = self.alphabet.index(char) + 1
 
             trans_state = self.pda_trans_table[row][col]  # Is a node object
         except:  # Catch any potential errors, assume the character was null
-            # print(f"Character trying to traverse on: {char}")
+            if self.print_computation: print(f"Character trying to traverse on: {char}")
             trans_state = 0
 
         # If the character to transition on is empty, check if there is a lambda transition
@@ -211,7 +223,7 @@ class PDA:
             trans_state = self.pda_trans_table[row][col]  # Get the transition
             if trans_state != 0:  # If there was a lambda transition
                 self.is_lambda = True
-                # print(f"Transition is lambda for: {state} to {trans_state}")
+                if self.print_computation: print(f"Transition is lambda for: {state} to {trans_state}")
 
         return trans_state
 
@@ -292,6 +304,12 @@ class PDA:
     def parse_data(self):
         # Get the states of the NFA
         state_len = len(self.input_data['states'])
+
+        # Get whether computation will be printed to console
+        if self.input_data["show_computation"] == "1":
+            self.print_computation = True
+        else:
+            self.print_computation = False
 
         for i in range(state_len):
             self.pda_states.append(self.input_data['states'][i])

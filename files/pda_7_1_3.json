@@ -1,0 +1,29 @@
+{
+    "description": "Example 7.1.3 from the Book",
+    "show_computation": "1",
+    "states": [
+        "q0",
+        "q1"
+    ],
+    "alphabet": [
+        "E",
+        "a", 
+        "b"
+    ],
+    "start_state": [
+        "q0"
+    ],
+    "end_state": [
+        "q1"
+    ],
+    "transitions": [
+        ["q0", "b", "q0", "E", "B"],
+        ["q0", "a", "q0", "E", "A"],
+        ["q0", "E", "q1", "E", "E"],
+
+        ["q1", "b", "q1", "B", "E"],
+        ["q1", "a", "q1", "A", "E"]
+    ],
+    "strings": ["", "abba", "a", "abba", "a"]
+}
+

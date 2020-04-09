@@ -1,5 +1,6 @@
 {
     "description": "Example PDA (NOTE: 'E' is lambda)",
+    "show_computation": "0",
     "states": [
         "q1",
         "q2",

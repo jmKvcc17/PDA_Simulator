@@ -43,10 +43,10 @@ def main_loop():
 
 
 if __name__ == "__main__":
-    main_loop()
+    # main_loop()
 
     file_dir = './files/'
-    data = json_reader.read_file(file_dir + 'pda_7_2_2.json')
+    data = json_reader.read_file(file_dir + 'pda_7_1_3.json')
 
     user_pda = pda.PDA(data)  # Create the PDA
 
