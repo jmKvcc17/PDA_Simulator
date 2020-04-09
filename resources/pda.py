@@ -132,7 +132,10 @@ class PDA:
 
         res = False
 
+        if self.print_computation: print(f"Current state: {current_state}, Current stack: {curr_stack}, Current string: \"{user_string}\"")
+
         if current_state == 0:  # If the state is null, traverse failed
+            if self.print_computation: print("Next state is null, failed to traverse.")
             return False
         else:
             for state in current_state.nodes:
@@ -143,10 +146,13 @@ class PDA:
                 else:
                     next_state = self.get_transition(state.name, user_string[0])  # Get the next state to travse
 
+                if self.print_computation: print(f"Next state: {next_state}")
+
                 if self.do_stack_action(state.stack_action, curr_stack):  # If the stack action is successful
                     if state.is_final:  # If the state is final
                         if len(user_string) == 0:  # If the string has been read
                             if len(curr_stack) == 0:  # If the stack has been cleared
+                                if self.print_computation: print(f"Current state: {state}, Current stack: {curr_stack}, Current string: \"{user_string}\"")
                                 return True  # Base case, 3 conditions met, the string is accepted.
 
                     if self.is_lambda:  # If the next state trans. on lambda, don't remove a character
@@ -158,8 +164,8 @@ class PDA:
                         if res:
                             break
                 else:  # If the stack action failed
-                    # print("Stack action failed. Moving on.")
                     if next_state == 0:
+                        if self.print_computation: print("Next state is null, failed to traverse.")
                         return False
                     
                     if next_state.count > 0:  # If there are still potential states to check for an accepting stack action, try them
