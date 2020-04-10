@@ -28,11 +28,24 @@ class TestPDASimulator(unittest.TestCase):
         self.assertTrue(test2.check_string("abab"))
         self.assertTrue(test2.check_string("baba"))
 
+        test3 = pda.PDA(json_reader.read_file(file_dir + 'pda_7_1_2.json'))
+        self.assertTrue(test3.check_string(""))
+        self.assertTrue(test3.check_string("a"))
+        self.assertTrue(test3.check_string("ab"))
+        self.assertTrue(test3.check_string("aaaaaaaaaa"))
+        self.assertTrue(test3.check_string("aaaaaaabbbbbbb"))
+        self.assertFalse(test3.check_string("aaaaaaabbbbbb"))
+        self.assertFalse(test3.check_string("abba"))
+        self.assertFalse(test3.check_string("abab"))
+        self.assertFalse(test3.check_string("baba"))
+
     def test_string_in_alphabet(self):
         """
         Tests if a string contains only characters defined in the alphabet
         """
         file_dir = './files/'
+        print()
+        print("Testing if string contains characters defined in the alphabet.")
 
         test1 = pda.PDA(json_reader.read_file(file_dir + 'pda_1_edit.json'))
         self.assertTrue(test1.check_if_in_alphabet(""))

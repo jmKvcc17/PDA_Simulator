@@ -157,11 +157,11 @@ class PDA:
 
                     if self.is_lambda:  # If the next state trans. on lambda, don't remove a character
                         res = self.traverse(next_state, user_string, curr_stack)
-                        if res:  # Base case, the 
+                        if res:  # Base case, the string is accepted
                             break
                     else:
                         res = self.traverse(next_state, user_string[1:], curr_stack)
-                        if res:
+                        if res:  # Base case, the string is accepted
                             break
                 else:  # If the stack action failed
                     if next_state == 0:
@@ -187,6 +187,10 @@ class PDA:
 
         current_state = self.pda_trans_table[1][0]  # Set the initial state to the starting state
         curr_stack = self.pda_stack
+
+        # SHORT-TERM BUGFIX
+        if len(user_string) == 0 and current_state.is_final:
+            return True
 
         # Get the first transition for the initial state
         if (len(user_string) == 0):
@@ -225,11 +229,14 @@ class PDA:
 
         # If the character to transition on is empty, check if there is a lambda transition
         if trans_state == 0:
-            col = self.alphabet.index("E") + 1  # Set the column to the lambda column
-            trans_state = self.pda_trans_table[row][col]  # Get the transition
-            if trans_state != 0:  # If there was a lambda transition
-                self.is_lambda = True
-                if self.print_computation: print(f"Transition is lambda for: {state} to {trans_state}")
+            try:
+                col = self.alphabet.index("E") + 1  # Set the column to the lambda column
+                trans_state = self.pda_trans_table[row][col]  # Get the transition
+                if trans_state != 0:  # If there was a lambda transition
+                    self.is_lambda = True
+                    if self.print_computation: print(f"Transition is lambda for: {state} to {trans_state}")
+            except ValueError:
+                pass
 
         return trans_state
 

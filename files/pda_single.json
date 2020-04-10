@@ -1,0 +1,22 @@
+{
+    "description": "Example to test how a single state PDA would work",
+    "show_computation": "1",
+    "states": [
+        "q0"
+    ],
+    "alphabet": [
+        "a"
+    ],
+    "start_state": [
+        "q0"
+    ],
+    "end_state": [
+        "q0"
+    ],
+    "transitions": [
+        ["q0", "a", "q0", "E", "A"],
+        ["q0", "a", "q0", "A", "E"]
+    ],
+    "strings": ["", "a", "aa"]
+}
+

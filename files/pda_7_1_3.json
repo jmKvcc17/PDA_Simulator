@@ -24,6 +24,6 @@
         ["q1", "b", "q1", "B", "E"],
         ["q1", "a", "q1", "A", "E"]
     ],
-    "strings": ["", "a", "b", "aa", "bb", "abba"]
+    "strings": ["", "a", "b", "aa", "bb", "abba", "baab"]
 }
 
