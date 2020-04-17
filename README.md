@@ -3,6 +3,7 @@ Simulates a Push-Down Automata with strings.
 
 ## Requirements
 * Python 3.5 or above
+* Linux/Unix
 
 ## How to run the simulation
 * In the root directory of the project, run: `python3 main.py`
