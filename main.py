@@ -1,5 +1,12 @@
 import os, sys
+from signal import signal, SIGINT
 from resources import json_reader, pda, menu
+
+
+def handler(signal_received, frame):
+    # Handle any cleanup here
+    print('SIGINT or CTRL-C detected. Exiting...')
+    exit(0)
 
 
 def main_loop():
@@ -15,6 +22,9 @@ def main_loop():
         print(f"Using PDA: {file}")
         user_pda = pda.PDA(data)  # Create the PDA
 
+        if user_pda.JSON_ERROR:  # If there was an issue reading the JSON file
+            continue
+
         menu.print_welcome_message()  # Print the welcome message
         menu.print_menu()  # Print the menu options
         user_input = menu.get_user_input()  # Print
@@ -22,7 +32,7 @@ def main_loop():
         while True:
 
             print()
-            if user_input == '1':  # Loop through the provided strings in the file
+            if user_input == '1' and user_pda.included_strings:  # Loop through the provided strings in the file
                 user_pda.check_strings()
             elif user_input == '2':  # The user manually enters a string
                 user_string = menu.get_user_string()
@@ -43,16 +53,20 @@ def main_loop():
 
 
 if __name__ == "__main__":
-    # main_loop()
+    signal(SIGINT, handler)
 
-    file_dir = './files/'
-    # data = json_reader.read_file(file_dir + 'pda_7_1_3.json')
-    data = json_reader.read_file(file_dir + 'pda_single.json')
+    main_loop()
 
-    user_pda = pda.PDA(data)  # Create the PDA
-    user_pda.user_print_transition_table()
+    print("No more files, exiting.")
 
-    user_pda.check_strings()
+    # file_dir = './files/'
+    # # data = json_reader.read_file(file_dir + 'pda_7_1_3.json')
+    # data = json_reader.read_file(file_dir + 'pda_single.json')
+
+    # user_pda = pda.PDA(data)  # Create the PDA
+    # user_pda.user_print_transition_table()
+
+    # user_pda.check_strings()
 
     
 

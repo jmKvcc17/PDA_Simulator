@@ -1,6 +1,6 @@
 {
     "description": "Example 7.1.2 from the Book",
-    "show_computation": "0",
+    "show_computation": "1",
     "states": [
         "q0",
         "q1",

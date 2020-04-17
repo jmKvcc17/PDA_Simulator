@@ -17,23 +17,25 @@ class PDA:
         self.pda_stack = [] # Use append() to push, pop() to remove
 
         # Bools
-        # Used to check if the current transition was a lambda transition, as to not 
-        # consume a character in the string
-        self.is_lambda = False
+        self.is_lambda = False # Used to check if the current transition was a lambda transition, as to not consume a character in the string
         self.included_strings = True  # Bool to check if the included JSON file has strings provided
+        self.JSON_ERROR = False
 
         # NFA and DFA construction
-        self.parse_data()  # Get data from the JSON file
+        self.JSON_ERROR = self.parse_data()  # Get data from the JSON file
 
-        print("Creating PDA...")
-        # NFA construction
-        self.pda_num_rows = len(self.pda_states) + 1
-        self.pda_num_cols = len(self.alphabet) + 1
-        self.pda_trans_table = [[0 for x in range(self.pda_num_cols)] for y in range(self.pda_num_rows)]
-        self.construct_trans_table(self.pda_trans_table, self.pda_num_rows, self.pda_num_cols, self.pda_transitions, self.pda_states)
-        # self.print_transition_table(self.pda_trans_table, self.pda_num_rows, self.pda_num_cols)
+        if self.JSON_ERROR == False:
+            print("Creating PDA...")
+            # NFA construction
+            self.pda_num_rows = len(self.pda_states) + 1
+            self.pda_num_cols = len(self.alphabet) + 1
+            self.pda_trans_table = [[0 for x in range(self.pda_num_cols)] for y in range(self.pda_num_rows)]
+            self.construct_trans_table(self.pda_trans_table, self.pda_num_rows, self.pda_num_cols, self.pda_transitions, self.pda_states)
 
-        print()
+            print()
+        else:
+            print("Error: Cannot construct PDA. Please check JSON file.")
+            print()
 
     def user_print_transition_table(self):
         self.print_transition_table(self.pda_trans_table, self.pda_num_rows, self.pda_num_cols)
@@ -54,6 +56,9 @@ class PDA:
       
 
     def check_string(self, string):
+        """
+        Checks a single string to see if it is accepted by the PDA
+        """
         ret = False
 
         if self.check_if_in_alphabet(string):
@@ -129,6 +134,11 @@ class PDA:
 
 
     def traverse(self, current_state, user_string, curr_stack):
+        """
+        Recursive function that takes the current state to traverse, the current string, and current stack
+        and sees if the current state will accept the string. If not, it will call itself again and pass
+        in the updated parameters.
+        """
 
         res = False
 
@@ -146,13 +156,13 @@ class PDA:
                 else:
                     next_state = self.get_transition(state.name, user_string[0])  # Get the next state to travse
 
-                if self.print_computation: print(f"Next state: {next_state}")
+                # if self.print_computation: print(f"Next state: {next_state}")
 
                 if self.do_stack_action(state.stack_action, curr_stack):  # If the stack action is successful
                     if state.is_final:  # If the state is final
                         if len(user_string) == 0:  # If the string has been read
                             if len(curr_stack) == 0:  # If the stack has been cleared
-                                if self.print_computation: print(f"Current state: {state}, Current stack: {curr_stack}, Current string: \"{user_string}\"")
+                                # if self.print_computation: print(f"Current state: {state}, Current stack: {curr_stack}, Current string: \"{user_string}\"")
                                 return True  # Base case, 3 conditions met, the string is accepted.
 
                     if self.is_lambda:  # If the next state trans. on lambda, don't remove a character
@@ -180,7 +190,7 @@ class PDA:
 
     def traverse_table(self, user_string):
         """
-        Accepts a user's string a recursively traverses the transition table to 
+        Accepts a user's string and recursively traverses the transition table to 
         see if it is accepted by the PDA.
         """
         res = False
@@ -188,7 +198,6 @@ class PDA:
         current_state = self.pda_trans_table[1][0]  # Set the initial state to the starting state
         curr_stack = self.pda_stack
 
-        # SHORT-TERM BUGFIX
         if len(user_string) == 0 and current_state.is_final:
             return True
 
@@ -214,7 +223,7 @@ class PDA:
         Given a starting state and a character, will return the transition state.
         The transition state is a NodeCollection object, so it could have multiple nodes in it
         """
-        if self.print_computation: print(f"Character trying to traverse on: {char}")
+        # if self.print_computation: print(f"Character trying to traverse on: {char}")
 
         self.is_lambda = False
         row = self.pda_states.index(state) + 1
@@ -224,7 +233,7 @@ class PDA:
 
             trans_state = self.pda_trans_table[row][col]  # Is a node object
         except:  # Catch any potential errors, assume the character was null
-            if self.print_computation: print(f"Character trying to traverse on: {char}")
+            # if self.print_computation: print(f"Character trying to traverse on: {char}")
             trans_state = 0
 
         # If the character to transition on is empty, check if there is a lambda transition
@@ -240,8 +249,10 @@ class PDA:
 
         return trans_state
 
-    # Constructs the transition table for the NFA (not t table)
     def construct_trans_table(self, trans_table, row, col, transitions, states):
+        """
+        Constructs the transition table for the NFA (not t table)
+        """
         
         # trans_table[0] is the first row
         # Input the alphabet characters
@@ -304,6 +315,9 @@ class PDA:
                 trans_table[start_index][char_index].add(node)
 
     def print_transition_table(self, trans_table, rows, cols):
+        """
+        Prints the transition table of the PDA
+        """
         for i in trans_table[0]:
             print(f"|{i}".ljust(13, '_'), end="")
         print()
@@ -313,40 +327,73 @@ class PDA:
                     print("|{:11}".format('{}'.format(trans_table[r][c])), end=" ")
             print()
 
-    # Parses the JSON data from the file
     def parse_data(self):
+        """
+        Parses the JSON data from the file
+        """
+        ret = False
+        state_len = 0
+
         # Get the states of the NFA
-        state_len = len(self.input_data['states'])
+        try:
+            state_len = len(self.input_data['states'])
+        except KeyError:
+            print("Error: JSON file missing states key/value(s) variable.")
+            ret = True
+        
+        try:
+            # Get whether computation will be printed to console
+            if self.input_data["show_computation"] == "1":
+                self.print_computation = True
+            else:
+                self.print_computation = False
+        except KeyError:
+            print("Error: JSON file missing show_computation key/value pair.")
+            ret = True
 
-        # Get whether computation will be printed to console
-        if self.input_data["show_computation"] == "1":
-            self.print_computation = True
-        else:
-            self.print_computation = False
+        try:
+            for i in range(state_len):
+                self.pda_states.append(self.input_data['states'][i])
+        except KeyError:
+            print("Error: JSON file missing states key/value(s) variable.")
+            ret = True
 
-        for i in range(state_len):
-            self.pda_states.append(self.input_data['states'][i])
+        try:
+            # Get the alphabet for the NFA
+            alphabet_len = len(self.input_data['alphabet'])
 
-        # Get the alphabet for the NFA
-        alphabet_len = len(self.input_data['alphabet'])
+            for i in range(alphabet_len):
+                self.alphabet.append(self.input_data['alphabet'][i])
+        except KeyError:
+            print("Error: JSON file missing alphabet key/value(s) variable.")
+            ret = True
 
-        for i in range(alphabet_len):
-            self.alphabet.append(self.input_data['alphabet'][i])
+        try:
+            # Get the start state for the NFA
+            self.start_state = self.input_data['start_state']
+        except KeyError:
+            print("Error: JSON file missing start state key/value pair.")
+            ret = True
 
-        # Get the start state for the NFA
-        self.start_state = self.input_data['start_state']
+        try:
+            # Get the end state(s)
+            end_len = len(self.input_data['end_state'])
 
-        # Get the end state(s)
-        end_len = len(self.input_data['end_state'])
+            for i in range(end_len):
+                self.end_state.append(self.input_data['end_state'][i])
+        except KeyError:
+            print("Error: JSON file missing end_state key/value(s) variable.")
+            ret = True
 
-        for i in range(end_len):
-            self.end_state.append(self.input_data['end_state'][i])
+        try:
+            # Get the transitions
+            trans_len = len(self.input_data['transitions'])
 
-        # Get the transitions
-        trans_len = len(self.input_data['transitions'])
-
-        for i in range(trans_len):
-            self.pda_transitions.append(self.input_data['transitions'][i])
+            for i in range(trans_len):
+                self.pda_transitions.append(self.input_data['transitions'][i])
+        except:
+            print("Error: JSON file missing transitions variable.")
+            ret = True
 
         # Get the strings
         try:
@@ -354,3 +401,5 @@ class PDA:
         except KeyError:
             print("No included strings in JSON file, switching to manual entry mode.")
             self.included_strings = False
+
+        return ret
